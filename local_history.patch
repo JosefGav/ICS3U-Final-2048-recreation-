@@ -1,0 +1,205 @@
+Index: src/Board.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/Board.java b/src/Board.java
+--- a/src/Board.java	
++++ b/src/Board.java	(date 1704237756750)
+@@ -73,6 +73,12 @@
+     public Board (int rows, int cols)
+     {
+         super( true );
++        // RENAME THE WINDOW HERE =================================================
++
++        /*
++        * 1. Check if the user has previously saved a game, if so ask them if they want to resume
++        * 2. If they don't want to resume game get the board dimensions through a slider before generating the board maybe do these two in main
++        * */
+ 
+         // create a JFrame
+         JFrame f = new JFrame( "512 ULTIMATE" );
+@@ -147,7 +153,7 @@
+ 
+         // creates a new button for saving and exiting the program
+         this.save =new JButton("Save And Exit");
+-        this.save.setBounds(50,100,100,50);
++        this.save.setBounds(50,100,95,30);
+ 
+         // make the following into a method maybe to reduce repeated code
+         // onclick handler for the submit button
+@@ -166,28 +172,42 @@
+         this.add(this.save);
+ 
+ 
+-        // vvvvv  not Josef's code  vvvvv
+-        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
++
++        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // default close operation needs to auto save game progress
+         f.setContentPane( this );
+         f.pack();
+         f.setVisible(true);
+-        // ^^^^^  not Josef's code  ^^^^^
+     }
+ 
+     public Board(int[][] grid, int rows, int cols) {
+         super( true );
+-
+         // RENAME THE WINDOW HERE =================================================
++
++        /*
++         * 1. Check if the user has previously saved a game, if so ask them if they want to resume
++         * 2. If they don't want to resume game get the board dimensions through a slider before generating the board maybe do these two in main
++         * */
++
++        // create a slider and wait for slider before creating game
++
++
++
+         JFrame f = new JFrame( "512 ULTIMATE" );
+ 
+-        // sets the board map to the grid value of the argument passed for the grid parameter
+         this.boardMap = grid;
+ 
+-        // sets rows and columns
++        JButton save =new JButton("Save And Exit");
++        save.setBounds(50,100,95,30);
++        save.addActionListener(e -> { // https://www.javatpoint.com/java-jbutton
++            System.out.println("Saving in progress");
++            Save.newSave(this.boardMap,this.score); // why does this.boardmap not work *********** ask mr benum + if i can use lambda **************
++            save.setEnabled(true);
++            System.exit(0);
++        });
++        this.add(save);
++
+         this.columns = cols;
+         this.rows = rows;
+-
+-        // vvvvv  not Josef's code vvvvv
+         originalWidth = 2*X_OFFSET+X_DIM*cols;
+         originalHeight = 2*Y_OFFSET+Y_DIM*rows+GAP+FONT_SIZE;
+ 
+@@ -199,66 +219,52 @@
+         this.setFocusable(true);
+         // MUST ADD THE KEYLISTENER TO THE BOARD (JPANEL) =========================
+         addKeyListener(this);
+-        // ^^^^^  not Josef's code  ^^^^^
+ 
+-//        this.addMouseListener(
+-//                new MouseInputAdapter()
+-//                {
+-//                    /** A method that is called when the mouse is clicked
+-//                     */
+-//                    public void mouseClicked(MouseEvent e)
+-//                    {
+-//                        int x = (int)e.getPoint().getX();
+-//                        int y = (int)e.getPoint().getY();
+-//
+-//                        // We need to by synchronized to the parent class so we can wake
+-//                        // up any threads that might be waiting for us
+-//                        synchronized(Board.this)
+-//                        {
+-//                            int curX = (int)Math.round(X_OFFSET*scale);
+-//                            int curY = (int)Math.round(Y_OFFSET*scale);
+-//                            int nextX = (int)Math.round((X_OFFSET+X_DIM*grid.length)*scale);
+-//                            int nextY = (int)Math.round((Y_OFFSET+Y_DIM*grid[0].length)*scale);
+-//
+-//                            // Subtract one from high end so clicks on the black edge
+-//                            // don't yield a row or column outside of board because of
+-//                            // the way the coordinate is calculated.
+-//                            if (x >= curX && y >= curY && x < nextX && y < nextY)
+-//                            {
+-//                                lastClick = new Coordinate(y,x);
+-//                                // Notify any threads that would be waiting for a mouse click
+-//                                Board.this.notifyAll() ;
+-//                            } /* if */
+-//                        } /* synchronized */
+-//                    } /* mouseClicked */
+-//                } /* anonymous MouseInputAdapater */
+-//        );
++        this.addMouseListener(
++                new MouseInputAdapter()
++                {
++                    /** A method that is called when the mouse is clicked
++                     */
++                    public void mouseClicked(MouseEvent e)
++                    {
++                        int x = (int)e.getPoint().getX();
++                        int y = (int)e.getPoint().getY();
+ 
++                        // We need to by synchronized to the parent class so we can wake
++                        // up any threads that might be waiting for us
++                        synchronized(Board.this)
++                        {
++                            int curX = (int)Math.round(X_OFFSET*scale);
++                            int curY = (int)Math.round(Y_OFFSET*scale);
++                            int nextX = (int)Math.round((X_OFFSET+X_DIM*grid.length)*scale);
++                            int nextY = (int)Math.round((Y_OFFSET+Y_DIM*grid[0].length)*scale);
+ 
+-        // creates a new button for saving and exiting the program
+-        this.save =new JButton("Save And Exit");
+-        // make the following into a method maybe to reduce repeated code
+-        // onclick handler for the submit button
+-        this.save.addActionListener(e -> { // https://www.javatpoint.com/java-jbutton
+-            System.out.println("Saving in progress");
++                            // Subtract one from high end so clicks on the black edge
++                            // don't yield a row or column outside of board because of
++                            // the way the coordinate is calculated.
++                            if (x >= curX && y >= curY && x < nextX && y < nextY)
++                            {
++                                lastClick = new Coordinate(y,x);
++                                // Notify any threads that would be waiting for a mouse click
++                                Board.this.notifyAll() ;
++                            } /* if */
++                        } /* synchronized */
++                    } /* mouseClicked */
++                } /* anonymous MouseInputAdapater */
++        );
+ 
+-            // save your progress
+-            Save.newSave(this.boardMap,this.score); // why does this.boardmap not work *********** ask mr benum + if i can use lambda **************
+-            //this.save.setEnabled(true); < ----- breaks the submit button visually
+ 
+-            // terminate program
+-            System.exit(0);
+-        });
+-        // set dimensions of the button and add it to the JFrame
+-        this.save.setBounds(50,100,100,50);
+-        this.add(this.save);
+-
+-        // vvvvv  not Josef's code  vvvvv
+-        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
++        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // default close operation needs to auto save game progress
+         f.setContentPane( this );
+         f.pack();
+         f.setVisible(true);
+-        // ^^^^^  not Josef's code  ^^^^^
++    }
++
++    /** A constructor to build a 1D board.
++     */
++    public Board (int cols)
++    {
++        this(1, cols);
+     }
+ 
+     // ADD THE KEYLISTENER EVENT METHODS HERE ====================================
+@@ -270,9 +276,6 @@
+ 
+     }
+ 
+-    /**
+-     * Key event is called whenever a user types a key
+-     * */
+     public void keyTyped(KeyEvent e) {
+         key = e.getKeyChar();
+     }
+@@ -280,7 +283,7 @@
+     // ACCESSOR METHOD THAT RETURNS THE KEY CHAR PRESSED ======================
+     public char getKey(){
+         char k = key;
+-        resetKey(); // resets the key so that the application doesn't repeatedly call the same method (get key is called on loop in the application classes main method)
++        resetKey(); // resets the key so that the board doesn't do the same move many times
+         return k;
+     }
+ 
