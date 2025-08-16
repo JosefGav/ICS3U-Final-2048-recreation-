@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="FinalProjectICS3U:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/FinalProjectICS3U_jar</output-path>
+    <root id="archive" name="FinalProjectICS3U.jar">
+      <element id="module-output" name="FinalProjectICS3U" />
+    </root>
+  </artifact>
+</component>
